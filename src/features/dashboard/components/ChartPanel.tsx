@@ -16,6 +16,11 @@ function buildChartOption(data: StressResult[], combo: string) {
     // data is already filtered to one pier + one combo, sorted by level
     const sorted = [...data].sort((a, b) => a.level - b.level);
 
+    // Auto-scale Y-axis based on actual data instead of hardcoding 1-100
+    const levels = sorted.map(r => r.level);
+    const minLevel = levels.length > 0 ? Math.min(...levels) : 1;
+    const maxLevel = levels.length > 0 ? Math.max(...levels) : 100;
+
     return {
         animationDuration: 0,   // disable per-update animation — 3 charts x 100 points on main thread = hang
         tooltip: { trigger: "axis" as const },
@@ -32,9 +37,8 @@ function buildChartOption(data: StressResult[], combo: string) {
             name: "Level",
             nameLocation: "end" as const,
             nameTextStyle: { fontSize: 11 },
-            min: 1,
-            max: 100,
-            interval: 10,
+            min: minLevel,
+            max: maxLevel,
             axisLabel: { fontSize: 10 },
         },
         series: [

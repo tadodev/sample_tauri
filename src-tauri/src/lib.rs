@@ -9,10 +9,10 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            // ── M pub(crate) pub(crate)anaged state: generate once, serve forever ─────────────
+            // ── Managed state: generate once, serve forever ─────────────
             app.manage(db::build_app_data());
 
-            // ──  pub(crate)Native menu ──────────────────────────────────────────────
+            // ── Native menu ──────────────────────────────────────────────
             let file_menu = SubmenuBuilder::new(app, "File")
                 .text("quit", "Quit")
                 .build()?;
@@ -48,6 +48,7 @@ pub fn run() {
             commands::get_sections,
             commands::get_forces,
             commands::get_stress_results,
+            commands::calculate_stress,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

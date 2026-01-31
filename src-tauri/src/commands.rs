@@ -19,3 +19,13 @@ pub async fn get_forces(data: State<'_, AppData>) -> Result<Vec<db::Force>, ()> 
 pub async fn get_stress_results(data: State<'_, AppData>) -> Result<Vec<db::StressResult>, ()> {
     Ok(data.stress.clone())
 }
+
+/// Recalculate stress with user-defined parameters.
+/// This is the MUTATION command — takes params, applies them to base data, returns new results.
+#[tauri::command]
+pub async fn calculate_stress(
+    data:   State<'_, AppData>,
+    params: db::StressParams,
+) -> Result<Vec<db::StressResult>, ()> {
+    Ok(db::calculate_with_params(&data, &params))
+}

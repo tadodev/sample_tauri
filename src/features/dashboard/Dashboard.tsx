@@ -1,6 +1,7 @@
-import PierSelector  from "./components/PierSelector";
-import ChartPanel    from "./components/ChartPanel";
-import SummaryTable  from "./components/SummaryTable";
+import PierSelector         from "./components/PierSelector";
+import ChartPanel           from "./components/ChartPanel";
+import SummaryTable         from "./components/SummaryTable";
+import CalculationControls  from "./components/CalculationControls";
 
 export default function Dashboard() {
     return (
@@ -15,6 +16,9 @@ export default function Dashboard() {
                 </div>
                 <PierSelector />
             </div>
+
+            {/* ── Calculation controls ─────────────────────────────────── */}
+            <CalculationControls />
 
             {/* ── Charts row ───────────────────────────────────────────── */}
             <ChartPanel />

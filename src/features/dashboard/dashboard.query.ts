@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { invoke }   from "@tauri-apps/api/core";
-import type { Section, Force, StressResult } from "@/types";
+import type { Section, Force, StressResult, StressParams } from "@/types";
 
 // staleTime: Infinity — data is static (generated once in Rust managed state),
 // so tell React Query to never consider it stale and never auto-refetch.
@@ -31,5 +31,37 @@ export function useStressResults() {
         queryKey: ["stress_results"],
         queryFn:  () => invoke<StressResult[]>("get_stress_results"),
         ...STATIC_QUERY,
+    });
+}
+
+/// Mutation: recalculate stress with user-defined params.
+/// On success, update the query cache with the new results.
+export function useCalculateStress() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (params: StressParams) => {
+            console.log('Invoking calculate_stress with params:', params);
+            return invoke<StressResult[]>("calculate_stress", {
+                params: {
+                    load_factors: params.loadFactors,
+                    level_range: params.levelRange,
+                }
+            });
+        },
+        onSuccess: (data) => {
+            console.log('Calculation succeeded, updating cache with', data.length, 'results');
+
+            // Find actual level range in returned data
+            const levels = data.map(r => r.level);
+            const actualMin = levels.length > 0 ? Math.min(...levels) : 0;
+            const actualMax = levels.length > 0 ? Math.max(...levels) : 0;
+
+            queryClient.setQueryData(["stress_results"], data);
+            queryClient.setQueryData(["calculated_level_range"], { min: actualMin, max: actualMax });
+        },
+        onError: (error) => {
+            console.error('Calculation failed:', error);
+        },
     });
 }
