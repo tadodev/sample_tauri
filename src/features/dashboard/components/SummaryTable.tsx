@@ -4,6 +4,7 @@ import {
     getCoreRowModel,
     useReactTable,
 } from "@tanstack/react-table";
+import { useMemo }          from "react";
 import useDashboardStore   from "@/features/dashboard/dashboard.store";
 import { useStressResults } from "@/features/dashboard/dashboard.query";
 import { PIERS }            from "@/types";
@@ -83,7 +84,10 @@ export default function SummaryTable() {
     const setSelectedPier = useDashboardStore((s) => s.setSelectedPier);
     const { data: stress, isLoading } = useStressResults();
 
-    const rows = stress ? buildSummaryRows(stress) : [];
+    const rows = useMemo(
+        () => (stress ? buildSummaryRows(stress) : []),
+        [stress]
+    );
 
     const table = useReactTable({
         data:      rows,

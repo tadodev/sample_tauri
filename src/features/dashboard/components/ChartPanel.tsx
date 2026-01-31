@@ -17,6 +17,7 @@ function buildChartOption(data: StressResult[], combo: string) {
     const sorted = [...data].sort((a, b) => a.level - b.level);
 
     return {
+        animationDuration: 0,   // disable per-update animation — 3 charts x 100 points on main thread = hang
         tooltip: { trigger: "axis" as const },
         grid:    { top: 28, right: 16, bottom: 32, left: 52 },
         xAxis: {

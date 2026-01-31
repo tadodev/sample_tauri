@@ -4,7 +4,7 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Section {
-    pub level: u16,
+    pub level: u32,
     pub pier:  String,
     pub w:     f64,   // width (m)
     pub d:     f64,   // depth (m)
@@ -12,7 +12,7 @@ pub struct Section {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Force {
-    pub level: u16,
+    pub level: u32,
     pub pier:  String,
     pub combo: String,  // "Gravity" | "Wind" | "Seismic"
     pub force: f64,     // kN
@@ -20,7 +20,7 @@ pub struct Force {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct StressResult {
-    pub level:  u16,
+    pub level:  u32,
     pub pier:   String,
     pub combo:  String,
     pub area:   f64,    // m²  = W * D
@@ -29,32 +29,34 @@ pub struct StressResult {
     pub id:     String, // composite key: "{pier}_{level}"
 }
 
+/// All pre-generated data, created once and stored as managed State
+pub struct AppData {
+    pub sections: Vec<Section>,
+    pub forces:   Vec<Force>,
+    pub stress:   Vec<StressResult>,
+}
+
 // ─── Fake data generation ────────────────────────────────────────────────────
-// Walls taper as you go up (wider at base, narrower at top).
-// Forces decrease with height too — base carries the most load.
 
 const PIERS:  [&str; 5] = ["P1", "P2", "P3", "P4", "P5"];
 const COMBOS: [&str; 3] = ["Gravity", "Wind", "Seismic"];
-const LEVELS: u16       = 100;
+const LEVELS: u32       = 100;
 
-/// Base dimensions per pier (ground floor, in metres)
 fn base_dims(pier: &str) -> (f64, f64) {
     match pier {
         "P1" => (1.2, 0.6),
         "P2" => (1.0, 0.5),
         "P3" => (0.9, 0.45),
         "P4" => (1.1, 0.55),
-        _    => (0.8, 0.4),   // P5
+        _    => (0.8, 0.4),
     }
 }
 
-/// Taper factor: dimensions shrink linearly to 40 % at roof
-fn taper(level: u16) -> f64 {
-    let t = (level as f64 - 1.0) / (LEVELS as f64 - 1.0); // 0 at L1, 1 at L100
+fn taper(level: u32) -> f64 {
+    let t = (level as f64 - 1.0) / (LEVELS as f64 - 1.0);
     1.0 - 0.6 * t
 }
 
-/// Base force magnitude per pier per combo (kN at ground)
 fn base_force(pier: &str, combo: &str) -> f64 {
     let pier_factor = match pier {
         "P1" => 1.0,
@@ -66,53 +68,50 @@ fn base_force(pier: &str, combo: &str) -> f64 {
     let combo_factor = match combo {
         "Gravity" => 5000.0,
         "Wind"    => 2200.0,
-        _         => 3100.0,  // Seismic
+        _         => 3100.0,
     };
     pier_factor * combo_factor
 }
 
-/// Force drops off with height (gravity accumulates downward; lateral loads peak mid-height)
-fn force_at_level(base: f64, level: u16, combo: &str) -> f64 {
-    let norm = (level as f64 - 1.0) / (LEVELS as f64 - 1.0); // 0..1
+fn force_at_level(base: f64, level: u32, combo: &str) -> f64 {
+    let norm = (level as f64 - 1.0) / (LEVELS as f64 - 1.0);
     match combo {
-        "Gravity" => base * (1.0 - 0.85 * norm),          // drops to 15 % at top
-        "Wind"    => base * (0.3 + 0.7 * (1.0 - norm)),   // peaks at base, 30 % at top
+        "Gravity" => base * (1.0 - 0.85 * norm),
+        "Wind"    => base * (0.3 + 0.7 * (1.0 - norm)),
         _         => {
-            // Seismic: triangular — peaks around mid-height
-            let mid = 0.5_f64;
+            let mid  = 0.5_f64;
             let dist = (norm - mid).abs();
             base * (1.0 - 0.6 * dist)
         }
     }
 }
 
-// ─── Public generators ───────────────────────────────────────────────────────
+// ─── Public: single entry point that builds everything once ─────────────────
 
-pub fn generate_sections() -> Vec<Section> {
-    let mut out = Vec::with_capacity((LEVELS as usize) * PIERS.len());
+pub fn build_app_data() -> AppData {
+    // sections
+    let mut sections = Vec::with_capacity((LEVELS as usize) * PIERS.len());
     for level in 1..=LEVELS {
         let t = taper(level);
         for &pier in &PIERS {
             let (w, d) = base_dims(pier);
-            out.push(Section {
+            sections.push(Section {
                 level,
-                pier:  pier.to_string(),
-                w:     (w * t * 1000.0).round() / 1000.0,
-                d:     (d * t * 1000.0).round() / 1000.0,
+                pier: pier.to_string(),
+                w:    (w * t * 1000.0).round() / 1000.0,
+                d:    (d * t * 1000.0).round() / 1000.0,
             });
         }
     }
-    out
-}
 
-pub fn generate_forces() -> Vec<Force> {
-    let mut out = Vec::with_capacity((LEVELS as usize) * PIERS.len() * COMBOS.len());
+    // forces
+    let mut forces = Vec::with_capacity((LEVELS as usize) * PIERS.len() * COMBOS.len());
     for level in 1..=LEVELS {
         for &pier in &PIERS {
             for &combo in &COMBOS {
                 let base = base_force(pier, combo);
                 let f    = force_at_level(base, level, combo);
-                out.push(Force {
+                forces.push(Force {
                     level,
                     pier:  pier.to_string(),
                     combo: combo.to_string(),
@@ -121,36 +120,30 @@ pub fn generate_forces() -> Vec<Force> {
             }
         }
     }
-    out
-}
 
-/// Cross-table join: match section + force on (level, pier), compute stress
-pub fn generate_stress_results() -> Vec<StressResult> {
-    let sections = generate_sections();
-    let forces   = generate_forces();
-
-    // Build a quick lookup map for sections: key = (level, pier)
+    // stress — cross-table join on (level, pier)
     use std::collections::HashMap;
-    let section_map: HashMap<(u16, &str), &Section> = sections
+    let section_map: HashMap<(u32, &str), &Section> = sections
         .iter()
         .map(|s| ((s.level, s.pier.as_str()), s))
         .collect();
 
-    let mut out = Vec::with_capacity(forces.len());
+    let mut stress = Vec::with_capacity(forces.len());
     for f in &forces {
         if let Some(sec) = section_map.get(&(f.level, f.pier.as_str())) {
             let area   = sec.w * sec.d;
-            let stress = if area > 0.0 { f.force / area } else { 0.0 };
-            out.push(StressResult {
+            let s      = if area > 0.0 { f.force / area } else { 0.0 };
+            stress.push(StressResult {
                 level:  f.level,
                 pier:   f.pier.clone(),
                 combo:  f.combo.clone(),
-                area:   (area   * 1000.0).round() / 1000.0,
+                area:   (area * 1000.0).round() / 1000.0,
                 force:  f.force,
-                stress: (stress * 100.0).round() / 100.0,
+                stress: (s * 100.0).round() / 100.0,
                 id:     format!("{}_{}", f.pier, f.level),
             });
         }
     }
-    out
+
+    AppData { sections, forces, stress }
 }

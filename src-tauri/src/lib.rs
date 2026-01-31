@@ -8,26 +8,28 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        // ── Setup: menu + event handler ──────────────────────────────
         .setup(|app| {
-            // File submenu — uses .text("id", "label") shorthand
+            // ── M pub(crate) pub(crate)anaged state: generate once, serve forever ─────────────
+            app.manage(db::build_app_data());
+
+            // ──  pub(crate)Native menu ──────────────────────────────────────────────
             let file_menu = SubmenuBuilder::new(app, "File")
                 .text("quit", "Quit")
                 .build()?;
 
-            // View submenu
             let view_menu = SubmenuBuilder::new(app, "View")
                 .text("reload", "Reload")
                 .build()?;
 
-            // Assemble and attach to app
             let menu = MenuBuilder::new(app)
                 .items(&[&file_menu, &view_menu])
                 .build()?;
             app.set_menu(menu)?;
 
-            // Menu event handler lives inside setup, bound to this app handle
-            app.on_menu_event(|app_handle, event| {
+            // ── Menu event handler ───────────────────────────────────────
+            // `move` is required per docs — needed when the closure captures
+            // references to menu items (e.g. for dynamic check/icon updates).
+            app.on_menu_event(move |app_handle: &tauri::AppHandle, event| {
                 match event.id().0.as_str() {
                     "quit" => std::process::exit(0),
                     "reload" => {
@@ -41,7 +43,7 @@ pub fn run() {
 
             Ok(())
         })
-        // ── Commands ─────────────────────────────────────────────────
+        // ── Commands ─────────────────────────────────────────────────────
         .invoke_handler(tauri::generate_handler![
             commands::get_sections,
             commands::get_forces,
