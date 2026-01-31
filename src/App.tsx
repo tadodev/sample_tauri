@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useUIStore from "@/features/greet/greet.store";
 import { useGreet } from "@/features/greet/greet.query";
 import {AppProviders} from "@/providers.tsx";
+import Dashboard from "@/features/dashboard/Dashboard.tsx";
 function AppContent() {
     const name = useUIStore((s) => s.name);
     const setName = useUIStore((s) => s.setName);
@@ -52,7 +53,8 @@ function AppContent() {
 export default function App() {
     return (
         <AppProviders>
-            <AppContent />
+            {/*<AppContent />*/}
+            <Dashboard/>
         </AppProviders>
     );
 }
