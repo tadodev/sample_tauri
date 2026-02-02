@@ -1,42 +1,51 @@
-use serde::Serialize;
+// ─── Domain types ────────────────────────────────────────────────────────────
+
+// src-tauri/src/db.rs
+use serde::{Serialize, Deserialize};  // ← Add Deserialize import
+use ts_rs::TS;
 
 // ─── Domain types ────────────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, TS)]
+#[ts(export)]  
 pub struct Section {
     pub level: u16,
     pub pier:  String,
-    pub w:     f64,   // width (m)
-    pub d:     f64,   // depth (m)
+    pub w:     f64,
+    pub d:     f64,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, TS)]
+#[ts(export)]
 pub struct Force {
     pub level: u16,
     pub pier:  String,
-    pub combo: String,  // "Gravity" | "Wind" | "Seismic"
-    pub force: f64,     // kN
+    pub combo: String,
+    pub force: f64,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, TS)]
+#[ts(export)]
 pub struct StressResult {
     pub level:  u16,
     pub pier:   String,
     pub combo:  String,
-    pub area:   f64,    // m²  = W * D
-    pub force:  f64,    // kN
-    pub stress: f64,    // kPa = force / area
-    pub id:     String, // composite key: "{pier}_{level}"
+    pub area:   f64,
+    pub force:  f64,
+    pub stress: f64,
+    pub id:     String,
 }
 
 /// User-defined calculation parameters
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]  // ← Add Deserialize
+#[ts(export)]
 pub struct StressParams {
     pub load_factors: LoadFactors,
-    pub level_range:  (u16, u16),  // (min, max) inclusive
+    pub level_range:  (u16, u16),
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]  // ← Add Deserialize
+#[ts(export)]
 pub struct LoadFactors {
     pub gravity: f64,
     pub wind:    f64,
