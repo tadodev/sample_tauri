@@ -40,14 +40,14 @@ export default function CalculationControls() {
                     <div key={combo} className="space-y-2">
                         <label className="text-xs font-medium capitalize flex items-center justify-between">
                             <span>{combo}</span>
-                            <span className="text-muted-foreground">{params.loadFactors[combo].toFixed(2)}x</span>
+                            <span className="text-muted-foreground">{params.load_factors[combo].toFixed(2)}x</span>
                         </label>
                         <input
                             type="range"
                             min="0.5"
                             max="2.0"
                             step="0.1"
-                            value={params.loadFactors[combo]}
+                            value={params.load_factors[combo]}
                             onChange={(e) => setLoadFactor(combo, parseFloat(e.target.value))}
                             className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                             disabled={calculate.isPending}
@@ -63,18 +63,18 @@ export default function CalculationControls() {
                     <Input
                         type="number"
                         min={1}
-                        max={params.levelRange[1]}
-                        value={params.levelRange[0]}
-                        onChange={(e) => setLevelRange([parseInt(e.target.value) || 1, params.levelRange[1]])}
+                        max={params.level_range[1]}
+                        value={params.level_range[0]}
+                        onChange={(e) => setLevelRange([parseInt(e.target.value) || 1, params.level_range[1]])}
                         className="w-20 h-8 text-sm"
                         disabled={calculate.isPending}
                     />
                     <span className="text-xs text-muted-foreground">to</span>
                     <Input
                         type="number"
-                        min={params.levelRange[0]}
-                        value={params.levelRange[1]}
-                        onChange={(e) => setLevelRange([params.levelRange[0], parseInt(e.target.value) || 100])}
+                        min={params.level_range[0]}
+                        value={params.level_range[1]}
+                        onChange={(e) => setLevelRange([params.level_range[0], parseInt(e.target.value) || 100])}
                         className="w-20 h-8 text-sm"
                         disabled={calculate.isPending}
                     />
@@ -101,9 +101,9 @@ export default function CalculationControls() {
                     <p className="text-green-600 font-medium">
                         ✓ Calculation complete
                     </p>
-                    {calculatedRange.max < params.levelRange[1] && (
+                    {calculatedRange.max < params.level_range[1] && (
                         <p className="text-amber-600">
-                            Note: Data available only up to level {calculatedRange.max} (requested {params.levelRange[1]})
+                            Note: Data available only up to level {calculatedRange.max} (requested {params.level_range[1]})
                         </p>
                     )}
                     <p className="text-muted-foreground">

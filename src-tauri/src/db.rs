@@ -252,3 +252,21 @@ pub fn calculate_with_params(base: &AppData, params: &StressParams) -> Vec<Stres
 
     results
 }
+
+
+
+// Add this at the END of the file
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[test]
+//     fn export_typescript_bindings() {
+//         // These will write to ../src/types/bindings/
+//         Section::export(&Default::default()).expect("Failed to export Section");
+//         Force::export(&Default::default()).expect("Failed to export Force");
+//         StressResult::export(&Default::default()).expect("Failed to export StressResult");
+//         StressParams::export(&Default::default()).expect("Failed to export StressParams");
+//         LoadFactors::export(&Default::default()).expect("Failed to export LoadFactors");
+//     }
+// }

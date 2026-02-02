@@ -22,7 +22,7 @@ const useDashboardStore = create<DashboardState>((set) => ({
         set((state) => ({
             params: {
                 ...state.params,
-                loadFactors: { ...state.params.loadFactors, [combo]: value },
+                loadFactors: { ...state.params.load_factors, [combo]: value },
             },
         })),
 

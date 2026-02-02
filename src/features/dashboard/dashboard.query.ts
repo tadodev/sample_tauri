@@ -44,8 +44,8 @@ export function useCalculateStress() {
             console.log('Invoking calculate_stress with params:', params);
             return invoke<StressResult[]>("calculate_stress", {
                 params: {
-                    load_factors: params.loadFactors,
-                    level_range: params.levelRange,
+                    load_factors: params.load_factors,
+                    level_range: params.level_range,
                 }
             });
         },

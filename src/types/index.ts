@@ -1,45 +1,22 @@
-export type Section = {
-    level: number;
-    pier:  string;
-    w:     number;
-    d:     number;
-};
+// src/types/index.ts
 
-export type Force = {
-    level: number;
-    pier:  string;
-    combo: string;
-    force: number;
-};
+// ── Generated Types (Single Source of Truth) ─────────────────────
+export type { Section } from './bindings/Section';
+export type { Force } from './bindings/Force';
+export type { StressResult } from './bindings/StressResult';
+export type { StressParams } from './bindings/StressParams';
+export type { LoadFactors } from './bindings/LoadFactors';
 
-export type StressResult = {
-    level:  number;
-    pier:   string;
-    combo:  string;
-    area:   number;
-    force:  number;
-    stress: number;
-    id:     string;   // "P1_42"
-};
-
+// ── Frontend-Only Types ──────────────────────────────────────────
 export type Combo = "Gravity" | "Wind" | "Seismic";
 
 export const COMBOS: Combo[] = ["Gravity", "Wind", "Seismic"];
-export const PIERS        = ["P1", "P2", "P3", "P4", "P5"];
+export const PIERS = ["P1", "P2", "P3", "P4", "P5"];
 
-// Calculation parameters
-export type LoadFactors = {
-    gravity: number;
-    wind:    number;
-    seismic: number;
-};
-
-export type StressParams = {
-    loadFactors: LoadFactors;
-    levelRange:  [number, number];  // [min, max]
-};
+// ── Constants ────────────────────────────────────────────────────
+import type { StressParams } from './bindings/StressParams';
 
 export const DEFAULT_PARAMS: StressParams = {
-    loadFactors: { gravity: 1.0, wind: 1.0, seismic: 1.0 },
-    levelRange:  [1, 200],
+  load_factors: { gravity: 1.0, wind: 1.0, seismic: 1.0 },
+  level_range: [1, 200],
 };
