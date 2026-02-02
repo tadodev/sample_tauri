@@ -17,6 +17,6 @@ export const PIERS = ["P1", "P2", "P3", "P4", "P5"];
 import type { StressParams } from './bindings/StressParams';
 
 export const DEFAULT_PARAMS: StressParams = {
-  load_factors: { gravity: 1.0, wind: 1.0, seismic: 1.0 },
-  level_range: [1, 200],
+  loadFactors: { gravity: 1.0, wind: 1.0, seismic: 1.0 },
+  levelRange: [1, 1000000],
 };

@@ -1,3 +1,4 @@
+// src/features/dashboard/dashboard.store.ts
 import { create } from "zustand";
 import { DEFAULT_PARAMS, type StressParams } from "@/types";
 
@@ -5,7 +6,6 @@ type DashboardState = {
     selectedPier: string;
     setSelectedPier: (pier: string) => void;
 
-    // Calculation parameters
     params: StressParams;
     setLoadFactor: (combo: "gravity" | "wind" | "seismic", value: number) => void;
     setLevelRange: (range: [number, number]) => void;
@@ -22,13 +22,15 @@ const useDashboardStore = create<DashboardState>((set) => ({
         set((state) => ({
             params: {
                 ...state.params,
-                loadFactors: { ...state.params.load_factors, [combo]: value },
+                loadFactors: { ...state.params.loadFactors, [combo]: value },
+                //            ^^^^^^^^^^^ Now correct!
             },
         })),
 
     setLevelRange: (range) =>
         set((state) => ({
             params: { ...state.params, levelRange: range },
+            //                         ^^^^^^^^^^ Now correct!
         })),
 
     resetParams: () => set({ params: DEFAULT_PARAMS }),

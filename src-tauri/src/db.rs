@@ -1,13 +1,11 @@
-// ─── Domain types ────────────────────────────────────────────────────────────
-
 // src-tauri/src/db.rs
-use serde::{Serialize, Deserialize};  // ← Add Deserialize import
+use serde::{Serialize, Deserialize};
 use ts_rs::TS;
 
 // ─── Domain types ────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Serialize, TS)]
-#[ts(export)]  
+#[ts(export)]
 pub struct Section {
     pub level: u16,
     pub pier:  String,
@@ -37,20 +35,23 @@ pub struct StressResult {
 }
 
 /// User-defined calculation parameters
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]  // ← Add Deserialize
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export)]
+#[serde(rename_all = "camelCase")]  // ← ADDED
 pub struct StressParams {
     pub load_factors: LoadFactors,
     pub level_range:  (u16, u16),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]  // ← Add Deserialize
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export)]
+#[serde(rename_all = "camelCase")]  // ← ADDED
 pub struct LoadFactors {
     pub gravity: f64,
     pub wind:    f64,
     pub seismic: f64,
 }
+
 
 /// All pre-generated data, created once and stored as managed State.
 /// Now configurable — generate for any max_level the user requests.

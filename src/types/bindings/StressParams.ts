@@ -4,4 +4,4 @@ import type { LoadFactors } from "./LoadFactors";
 /**
  * User-defined calculation parameters
  */
-export type StressParams = { load_factors: LoadFactors, level_range: [number, number], };
+export type StressParams = { loadFactors: LoadFactors, levelRange: [number, number], };

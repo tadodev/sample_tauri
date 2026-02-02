@@ -42,12 +42,7 @@ export function useCalculateStress() {
     return useMutation({
         mutationFn: (params: StressParams) => {
             console.log('Invoking calculate_stress with params:', params);
-            return invoke<StressResult[]>("calculate_stress", {
-                params: {
-                    load_factors: params.load_factors,
-                    level_range: params.level_range,
-                }
-            });
+            return invoke<StressResult[]>("calculate_stress", { params });
         },
         onSuccess: (data) => {
             console.log('Calculation succeeded, updating cache with', data.length, 'results');
